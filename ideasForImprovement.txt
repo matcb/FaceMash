@@ -1,0 +1,152 @@
+
+
+To Avoid errors:
+1. Modularize Your Code
+Break down functions into single-responsibility parts (e.g., one function for updating votes, another for sorting, and another for updating the display).
+This makes it easier to test each part individually and pinpoint where something might go wrong.
+2. Name Functions Clearly
+Use descriptive function names so you immediately know what each function does. For example, updateVoteCount() is clearer than just update().
+Clear names help you understand and trace code logic faster, especially if you revisit the code later.
+3. Use Comments and Documentation
+Briefly comment on what each function does, especially complex or less obvious logic.
+Documenting the purpose of your code and key steps in your logic can save time when debugging and help others understand your code.
+4. Check Your Data Flow
+Keep track of variables and data passed between functions (like imagemAtual1 and imagemAtual2 in your application).
+Consider logging key values to the console to ensure they’re correct at each step, especially when they change state after an event (like a click).
+5. Use Console Logs for Debugging
+console.log() is one of the best tools for real-time debugging. Print out variables at critical steps to verify they’re holding expected values.
+For example, logging the imagens array after each vote can help you ensure that vote counts are correctly updating.
+6. Separate Display and Logic Code
+Avoid mixing code that manipulates data (like updating vote counts) with code that updates the UI.
+Keep logic functions (like vote counting and sorting) separate from display functions (like updating the ranking list). This separation makes it easier to identify where an error originates.
+7. Use DevTools for Inspecting the DOM
+Browser Developer Tools (like Chrome DevTools) allow you to inspect the DOM, monitor events, and see real-time changes in your HTML elements.
+If elements aren’t updating as expected, check the DOM structure in DevTools to verify that IDs, classes, and event listeners are correctly set up.
+8. Leverage Debugger Tools
+Use the debugger keyword or DevTools debugger to pause code execution at specific lines and inspect values step-by-step.
+This is especially useful for tracing complex logic or troubleshooting when multiple functions interact with the same data.
+9. Validate Your HTML and CSS Structure
+Ensure HTML elements (like IDs and classes) match those expected in your JavaScript. Typos in element IDs can lead to hard-to-detect errors.
+10. Use Version Control
+Use a version control system like Git to keep track of changes. If something breaks after a change, you can easily revert to the last working version.
+This also helps you maintain different versions of the app as you add or test new features.
+
+
+
+TROUBLESHOOTING
+
+THE WRONNG CODE:
+
+ function atualizarRanking() {
+    imagens.sort((a, b) => b.votos - a.votos);
+}
+
+
+     function registrarVoto(imagem) {
+    if (imagem === imagemAtual1) {
+      imagemAtual1.votos++;
+    } else if (imagem === imagemAtual2) {
+      imagemAtual2.votos++;
+    }
+    
+    atualizarRanking();
+    apresentarImagens()
+  }
+
+    
+
+
+const ranking = document.getElementById('ranking');
+  ranking.innerHTML = '';
+  imagens.forEach((imagem, index) => {
+    const li = document.createElement('li');
+    li.textContent = `${index + 1}. ${imagem.alias} (${imagem.votos} votos)`;
+    ranking.appendChild(li);
+  });
+
+I've reviewed your JavaScript code, and it seems that the main issue is that the ranking display update (adding list items with vote counts) is outside of the atualizarRanking() function. As a result, the ranking display is not refreshed each time the ranking is updated.
+
+Here’s what needs to be adjusted:
+
+1. Move the Ranking Display Logic Inside atualizarRanking()
+To ensure the ranking list updates each time a vote is cast, we need to clear and regenerate the <ul> list in the atualizarRanking() function.
+
+2. Attach Click Event Listeners to the Images
+Make sure to attach event listeners to the images so that clicking them registers a vote.
+
+Updated Code with Fixes
+Below is your code with the suggested fixes applied:
+
+THE TROUBLESHOOTING CODE: 
+
+const imagens = [
+    { alias: 'Capitã Marvel', url: "./img/carol_danvers.jpeg", votos: 0 },
+    { alias: 'Ezra', url: "./img/ezra.webp", votos: 0 },
+    { alias: 'Hinata', url: "./img/images.jpg", votos: 0 },
+    { alias: 'Jane foster', url: "./img/jane_foster.jpg", votos: 0 },
+    { alias: 'Natasha', url: "./img/natasha.jpg", votos: 0 },
+    { alias: 'Sakura', url: "./img/sakura.jpeg", votos: 0 },
+    { alias: 'Sarada', url: "./img/sarada.jpeg", votos: 0 },
+    { alias: 'Shizune', url: "./img/shizune.jpeg", votos: 0 },
+    { alias: 'Tenten', url: "./img/tenten.jpg", votos: 0 },
+    { alias: 'Tsunade', url: "./img/tsunade.jpg", votos: 0 },
+    { alias: 'Valkyrie', url: "./img/valkyrie.jpg", votos: 0 },
+    { alias: 'Wanda', url: "./img/wanda.jpg", votos: 0 },
+];
+
+let imagemAtual1, imagemAtual2;
+
+// Function to display two random images
+function apresentarImagens() {
+    imagemAtual1 = imagens[Math.floor(Math.random() * imagens.length)];
+    imagemAtual2 = imagens[Math.floor(Math.random() * imagens.length)];
+
+    // Ensure the two images are different
+    while (imagemAtual1 === imagemAtual2) {
+        imagemAtual2 = imagens[Math.floor(Math.random() * imagens.length)];
+    }
+
+    document.getElementById('imagem1').src = imagemAtual1.url;
+    document.getElementById('imagem2').src = imagemAtual2.url;
+}
+
+// Function to update the ranking display
+function atualizarRanking() {
+    // Sort images by vote count in descending order
+    imagens.sort((a, b) => b.votos - a.votos);
+
+    const ranking = document.getElementById('ranking');
+    ranking.innerHTML = ''; // Clear previous ranking
+
+    // Rebuild the ranking list based on sorted vote counts
+    imagens.forEach((imagem, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${index + 1}. ${imagem.alias} (${imagem.votos} votos)`;
+        ranking.appendChild(li);
+    });
+}
+
+// Function to register a vote for the clicked image
+function registrarVoto(imagem) {
+    if (imagem === imagemAtual1) {
+        imagemAtual1.votos++;
+    } else if (imagem === imagemAtual2) {
+        imagemAtual2.votos++;
+    }
+
+    atualizarRanking();    // Update the ranking display after a vote
+    apresentarImagens();   // Show new images after each vote
+}
+
+// Initialize images and ranking on page load
+apresentarImagens();
+atualizarRanking(); // Initial ranking setup
+
+// Set up click events for voting
+document.getElementById('imagem1').addEventListener('click', () => registrarVoto(imagemAtual1));
+document.getElementById('imagem2').addEventListener('click', () => registrarVoto(imagemAtual2));
+
+
+Moved Ranking Display Logic into atualizarRanking(): Now, every time atualizarRanking() is called, the <ul> element for ranking will be cleared and repopulated with the updated list.
+Attached Event Listeners to Images: Added click event listeners to the images with IDs imagem1 and imagem2. Each click triggers registrarVoto() for the respective image, which then updates the ranking and refreshes the displayed images.
+Initial Ranking Display: Called atualizarRanking() once at the start to set up the initial ranking display.
